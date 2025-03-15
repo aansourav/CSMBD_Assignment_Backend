@@ -2,7 +2,6 @@
 
 <div align="center">
 
-![CSMBD Social Platform](https://via.placeholder.com/800x200/0073CF/FFFFFF?text=CSMBD+Social+Platform+API)
 
 A robust backend API for a social platform enabling user registration, authentication, profile management, and content sharing.
 
@@ -640,6 +639,6 @@ Profile pictures are managed with the following features:
 
 <div align="center">
 
-**🌟 Built with ❤️ by the CSMBD Team 🌟**
+**🌟 Built with ❤️ by [Abdullah An-Noor](https://aansourav.vercel.app) 🌟**
 
 </div>
