@@ -55,7 +55,10 @@ try {
 app.use(helmet()); // Add security headers
 app.use(
     cors({
-        origin: ["http://localhost:3000"], // Restrict to trusted origins
+        origin: [
+            "http://localhost:3000",
+            "https://csmbd-assignment-frontend.vercel.app",
+        ], // Restrict to trusted origins
         credentials: true, // Allow cookies with CORS
         methods: ["GET", "POST", "PUT", "DELETE"], // Allow specific methods
         allowedHeaders: ["Content-Type", "Authorization"], // Allow specific headers
