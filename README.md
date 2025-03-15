@@ -1,61 +1,76 @@
-# CSMBD Social Platform API
+# 🌐 CSMBD Social Platform API
 
-A robust backend API for a social platform that enables user registration, authentication, profile management, and content sharing through YouTube embed links.
+<div align="center">
 
-[![Node.js](https://img.shields.io/badge/Node.js-16.x-green.svg)](https://nodejs.org/)
-[![Express](https://img.shields.io/badge/Express-4.x-blue.svg)](https://expressjs.com/)
-[![Sequelize](https://img.shields.io/badge/Sequelize-6.x-orange.svg)](https://sequelize.org/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14.x-blue.svg)](https://www.postgresql.org/)
+![CSMBD Social Platform](https://via.placeholder.com/800x200/0073CF/FFFFFF?text=CSMBD+Social+Platform+API)
 
-## Table of Contents
+A robust backend API for a social platform enabling user registration, authentication, profile management, and content sharing.
 
--   [Features](#features)
--   [API Documentation](#api-documentation)
--   [Environment Variables](#environment-variables)
--   [Project Setup](#project-setup)
--   [Project Structure](#project-structure)
--   [Authentication](#authentication)
--   [Data Validation](#data-validation)
--   [Error Handling](#error-handling)
--   [File Uploads](#file-uploads)
--   [Security Implementation](#security-implementation)
--   [Performance Optimizations](#performance-optimizations)
--   [Contributing](#contributing)
--   [License](#license)
+[![Node.js](https://img.shields.io/badge/Node.js-16.x-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Express](https://img.shields.io/badge/Express-4.x-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
+[![Sequelize](https://img.shields.io/badge/Sequelize-6.x-52B0E7?style=for-the-badge&logo=sequelize&logoColor=white)](https://sequelize.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14.x-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![JWT](https://img.shields.io/badge/JWT-Authentication-000000?style=for-the-badge&logo=json-web-tokens&logoColor=white)](https://jwt.io/)
 
-## Features
+</div>
 
-### User Authentication
+---
+
+## 📑 Table of Contents
+
+-   [🌟 Features](#-features)
+-   [📚 API Documentation](#-api-documentation)
+-   [⚙️ Environment Variables](#️-environment-variables)
+-   [🚀 Project Setup](#-project-setup)
+-   [🏗️ Project Structure](#️-project-structure)
+-   [🔐 Authentication](#-authentication)
+-   [✅ Data Validation](#-data-validation)
+-   [⚠️ Error Handling](#️-error-handling)
+-   [📁 File Uploads](#-file-uploads)
+-   [🛡️ Security Implementation](#️-security-implementation)
+-   [⚡ Performance Optimizations](#-performance-optimizations)
+-   [🤝 Contributing](#-contributing)
+
+---
+
+## 🌟 Features
+
+### 👤 User Authentication
 
 -   **Registration**: New users can create accounts with name, email, and password
 -   **Login**: Secure authentication with JWT tokens
 -   **Logout**: Invalidate current session
 
-### User Profile Management
+### 👤 User Profile Management
 
 -   **View Profile**: Authenticated users can view their own profile
 -   **Edit Profile**: Update personal details including name, email, bio, and location
 -   **Profile Picture**: Upload, update, and retrieve profile pictures with default fallback
 -   **Content Management**: Add and remove YouTube embed links with titles
 
-### Content Sharing
+### 📺 Content Sharing
 
 -   **YouTube Links**: Share favorite YouTube videos on personal profiles
 -   **Content Aggregation**: Browse all shared content across the platform
 
-### Visitor Access
+### 🔎 Visitor Access
 
 -   **User Discovery**: Browse all registered users with pagination
 -   **Profile Viewing**: View any user's profile and their shared content
 -   **Content Discovery**: View all shared content with sorting options
 
-## API Documentation
+<div align="right">[ <a href="#-table-of-contents">Back to Top ⬆️</a> ]</div>
 
-### Authentication Endpoints
+---
 
-#### `POST /api/v1/auth/signup` - Register a new user
+## 📚 API Documentation
 
-**Request Body:**
+### 🔑 Authentication Endpoints
+
+<details>
+<summary><b>POST /api/v1/auth/signup</b> - Register a new user</summary>
+
+#### Request Body:
 
 ```json
 {
@@ -65,7 +80,7 @@ A robust backend API for a social platform that enables user registration, authe
 }
 ```
 
-**Success Response:** `201 Created`
+#### Success Response: `201 Created`
 
 ```json
 {
@@ -84,9 +99,12 @@ A robust backend API for a social platform that enables user registration, authe
 }
 ```
 
-#### `POST /api/v1/auth/signin` - Login an existing user
+</details>
 
-**Request Body:**
+<details>
+<summary><b>POST /api/v1/auth/signin</b> - Login an existing user</summary>
+
+#### Request Body:
 
 ```json
 {
@@ -95,7 +113,7 @@ A robust backend API for a social platform that enables user registration, authe
 }
 ```
 
-**Success Response:** `200 OK`
+#### Success Response: `200 OK`
 
 ```json
 {
@@ -112,9 +130,12 @@ A robust backend API for a social platform that enables user registration, authe
 }
 ```
 
-#### `POST /api/v1/auth/signout` - Logout the current user
+</details>
 
-**Success Response:** `200 OK`
+<details>
+<summary><b>POST /api/v1/auth/signout</b> - Logout the current user</summary>
+
+#### Success Response: `200 OK`
 
 ```json
 {
@@ -123,16 +144,19 @@ A robust backend API for a social platform that enables user registration, authe
 }
 ```
 
-### User Endpoints
+</details>
 
-#### `GET /api/v1/users` - Get a list of all users
+### 👥 User Endpoints
 
-**Query Parameters:**
+<details>
+<summary><b>GET /api/v1/users</b> - Get a list of all users</summary>
+
+#### Query Parameters:
 
 -   `page` (optional): Page number (default: 1)
 -   `limit` (optional): Number of users per page (default: 10)
 
-**Success Response:** `200 OK`
+#### Success Response: `200 OK`
 
 ```json
 {
@@ -162,15 +186,18 @@ A robust backend API for a social platform that enables user registration, authe
 }
 ```
 
-#### `GET /api/v1/users/content` - Get all content (YouTube links) across all users
+</details>
 
-**Query Parameters:**
+<details>
+<summary><b>GET /api/v1/users/content</b> - Get all content across all users</summary>
+
+#### Query Parameters:
 
 -   `page` (optional): Page number (default: 1)
 -   `limit` (optional): Items per page (default: 10, max: 50)
 -   `sortBy` (optional): Sort order - "newest", "oldest", or "popular" (default: "newest")
 
-**Success Response:** `200 OK`
+#### Success Response: `200 OK`
 
 ```json
 {
@@ -202,9 +229,12 @@ A robust backend API for a social platform that enables user registration, authe
 }
 ```
 
-#### `GET /api/v1/users/:id` - Get a specific user by ID
+</details>
 
-**Success Response:** `200 OK`
+<details>
+<summary><b>GET /api/v1/users/:id</b> - Get a specific user by ID</summary>
+
+#### Success Response: `200 OK`
 
 ```json
 {
@@ -222,15 +252,23 @@ A robust backend API for a social platform that enables user registration, authe
 }
 ```
 
-#### `GET /api/v1/users/:id/profile-picture` - Get a user's profile picture
+</details>
 
-**Success Response:** Returns the profile image file or default image if none exists
+<details>
+<summary><b>GET /api/v1/users/:id/profile-picture</b> - Get a user's profile picture</summary>
 
-### Profile Management Endpoints (Requires Authentication)
+#### Success Response:
 
-#### `GET /api/v1/users/profile/me` - Get current user's profile
+Returns the profile image file or default image if none exists
 
-**Success Response:** `200 OK`
+</details>
+
+### 👤 Profile Management Endpoints (Requires Authentication)
+
+<details>
+<summary><b>GET /api/v1/users/profile/me</b> - Get current user's profile</summary>
+
+#### Success Response: `200 OK`
 
 ```json
 {
@@ -248,9 +286,12 @@ A robust backend API for a social platform that enables user registration, authe
 }
 ```
 
-#### `PUT /api/v1/users/profile/me` - Update current user's profile
+</details>
 
-**Request Body:** (Multipart form data)
+<details>
+<summary><b>PUT /api/v1/users/profile/me</b> - Update current user's profile</summary>
+
+#### Request Body: (Multipart form data)
 
 -   `name` (optional): Updated name
 -   `email` (optional): Updated email
@@ -258,7 +299,7 @@ A robust backend API for a social platform that enables user registration, authe
 -   `location` (optional): Updated location
 -   `profilePicture` (optional): Image file for profile picture
 
-**Success Response:** `200 OK`
+#### Success Response: `200 OK`
 
 ```json
 {
@@ -276,9 +317,12 @@ A robust backend API for a social platform that enables user registration, authe
 }
 ```
 
-#### `POST /api/v1/users/profile/youtube` - Add a YouTube link to profile
+</details>
 
-**Request Body:**
+<details>
+<summary><b>POST /api/v1/users/profile/youtube</b> - Add a YouTube link to profile</summary>
+
+#### Request Body:
 
 ```json
 {
@@ -287,7 +331,7 @@ A robust backend API for a social platform that enables user registration, authe
 }
 ```
 
-**Success Response:** `201 Created`
+#### Success Response: `201 Created`
 
 ```json
 {
@@ -310,9 +354,12 @@ A robust backend API for a social platform that enables user registration, authe
 }
 ```
 
-#### `DELETE /api/v1/users/profile/youtube/:linkId` - Remove a YouTube link from profile
+</details>
 
-**Success Response:** `200 OK`
+<details>
+<summary><b>DELETE /api/v1/users/profile/youtube/:linkId</b> - Remove a YouTube link</summary>
+
+#### Success Response: `200 OK`
 
 ```json
 {
@@ -327,11 +374,17 @@ A robust backend API for a social platform that enables user registration, authe
 }
 ```
 
-## Environment Variables
+</details>
+
+<div align="right">[ <a href="#-table-of-contents">Back to Top ⬆️</a> ]</div>
+
+---
+
+## ⚙️ Environment Variables
 
 Create a `.env.development.local` file for development and a `.env.production.local` file for production with the following variables:
 
-```
+```bash
 # Server Configuration
 PORT=5000
 NODE_ENV=development
@@ -347,7 +400,14 @@ DB_URI=postgresql://username:password@localhost:5432/database_name
 CORS_ORIGIN=http://localhost:3000
 ```
 
-## Project Setup
+<div align="right">[ <a href="#-table-of-contents">Back to Top ⬆️</a> ]</div>
+
+---
+
+## 🚀 Project Setup
+
+<details>
+<summary><b>Step-by-Step Setup Instructions</b></summary>
 
 1. **Clone the repository**
 
@@ -363,7 +423,8 @@ CORS_ORIGIN=http://localhost:3000
     ```
 
 3. **Set up environment variables**
-   Create the `.env.development.local` file as described above
+
+    Create the `.env.development.local` file as described above
 
 4. **Create uploads directory** (if not present)
 
@@ -386,11 +447,16 @@ CORS_ORIGIN=http://localhost:3000
     ```
 
 7. **Start the production server**
-    ```bash
+`bash
     npm start
-    ```
+    `
+  </details>
 
-## Project Structure
+<div align="right">[ <a href="#-table-of-contents">Back to Top ⬆️</a> ]</div>
+
+---
+
+## 🏗️ Project Structure
 
 ```
 csmbd-social-platform-api/
@@ -415,13 +481,19 @@ csmbd-social-platform-api/
 │   └── profile-pictures/
 │       └── default.png
 ├── index.js             # Application entry point
-├── package.json
-└── README.md
+└── package.json
 ```
 
-## Authentication
+<div align="right">[ <a href="#-table-of-contents">Back to Top ⬆️</a> ]</div>
+
+---
+
+## 🔐 Authentication
 
 This API uses JSON Web Tokens (JWT) for authentication:
+
+<details>
+<summary><b>Authentication Flow</b></summary>
 
 1. When a user registers or logs in, a JWT token is generated and returned
 2. For protected routes, include the token in the Authorization header:
@@ -430,14 +502,24 @@ This API uses JSON Web Tokens (JWT) for authentication:
     ```
 3. The `authorize` middleware validates the token before allowing access to protected resources
 4. Tokens have a configurable expiration time (default: 7 days)
+ </details>
 
-## Data Validation
+<div align="right">[ <a href="#-table-of-contents">Back to Top ⬆️</a> ]</div>
+
+---
+
+## ✅ Data Validation
+
+<details>
+<summary><b>Validation Layers</b></summary>
 
 -   **Joi**: All incoming requests are validated using Joi schemas to ensure data integrity
 -   **Sequelize Validators**: Database models include validation rules to prevent invalid data storage
 -   **Custom Validation**: Additional business logic validations are implemented in controllers
+</details>
 
-### Validation Examples
+<details>
+<summary><b>Validation Examples</b></summary>
 
 #### User Registration Validation
 
@@ -449,8 +531,16 @@ This API uses JSON Web Tokens (JWT) for authentication:
 
 -   Must be a valid YouTube URL format
 -   Title: Required, maximum 100 characters
+</details>
 
-## Error Handling
+<div align="right">[ <a href="#-table-of-contents">Back to Top ⬆️</a> ]</div>
+
+---
+
+## ⚠️ Error Handling
+
+<details>
+<summary><b>Error Response Format</b></summary>
 
 All API endpoints use a consistent error response format:
 
@@ -461,7 +551,10 @@ All API endpoints use a consistent error response format:
 }
 ```
 
-Common HTTP status codes:
+</details>
+
+<details>
+<summary><b>HTTP Status Codes</b></summary>
 
 -   `400 Bad Request`: Invalid input data
 -   `401 Unauthorized`: Authentication required or invalid credentials
@@ -469,18 +562,34 @@ Common HTTP status codes:
 -   `404 Not Found`: Resource not found
 -   `409 Conflict`: Resource conflict (e.g., duplicate email)
 -   `500 Internal Server Error`: Server-side error
+</details>
 
-## File Uploads
+<div align="right">[ <a href="#-table-of-contents">Back to Top ⬆️</a> ]</div>
+
+---
+
+## 📁 File Uploads
 
 Profile pictures are managed with the following features:
+
+<details>
+<summary><b>File Upload Features</b></summary>
 
 -   **Storage**: Profile images are stored in the `uploads/profile-pictures` directory
 -   **Default Image**: A default profile picture is provided for users without uploaded images
 -   **Validation**: Only images (JPEG, PNG, GIF, WebP) up to 2MB are accepted
 -   **Clean-up**: Old profile pictures are automatically deleted when replaced
 -   **Secure Naming**: Files are renamed using timestamps and cryptographic randomization
+</details>
 
-## Security Implementation
+<div align="right">[ <a href="#-table-of-contents">Back to Top ⬆️</a> ]</div>
+
+---
+
+## 🛡️ Security Implementation
+
+<details>
+<summary><b>Security Features</b></summary>
 
 -   **Password Hashing**: Passwords are hashed using bcrypt before storage
 -   **JWT Authentication**: Secure, stateless authentication mechanism
@@ -489,8 +598,16 @@ Profile pictures are managed with the following features:
 -   **CORS**: Cross-Origin Resource Sharing is configured to restrict access
 -   **Rate Limiting**: Limits requests to prevent brute force attacks
 -   **File Upload Security**: Strict file type validation and size limits
+</details>
 
-## Performance Optimizations
+<div align="right">[ <a href="#-table-of-contents">Back to Top ⬆️</a> ]</div>
+
+---
+
+## ⚡ Performance Optimizations
+
+<details>
+<summary><b>Performance Features</b></summary>
 
 -   **Database Connection Pooling**: Optimized for efficient database connections
 -   **Pagination**: All list endpoints support pagination to limit response size
@@ -499,15 +616,30 @@ Profile pictures are managed with the following features:
 -   **Cache Control**: Static assets use proper cache control headers
 -   **Query Parameter Validation**: All query parameters are validated and sanitized
 -   **Error Logging**: Comprehensive error logging for debugging and monitoring
+</details>
 
-## Contributing
+<div align="right">[ <a href="#-table-of-contents">Back to Top ⬆️</a> ]</div>
+
+---
+
+## 🤝 Contributing
+
+<details>
+<summary><b>Contribution Guidelines</b></summary>
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit your changes (`git commit -m 'Add some amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
+ </details>
 
-## License
+<div align="right">[ <a href="#-table-of-contents">Back to Top ⬆️</a> ]</div>
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+---
+
+<div align="center">
+
+**🌟 Built with ❤️ by the CSMBD Team 🌟**
+
+</div>
