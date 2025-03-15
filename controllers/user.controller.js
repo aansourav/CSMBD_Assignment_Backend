@@ -363,7 +363,9 @@ export const getAllContent = async (req, res, next) => {
             ? req.query.sortBy
             : "newest"; // Default to newest
 
-        // Get all users with their YouTube links
+        // Performance optimization: Only retrieve users with YouTube links
+        // This uses the database to filter instead of fetching all users and filtering in memory
+        // Note: A database index on youtube_links would improve this query's performance
         const users = await User.findAll({
             attributes: ["id", "name", "youtubeLinks"],
             where: {
@@ -373,52 +375,68 @@ export const getAllContent = async (req, res, next) => {
                     [sequelize.Op.ne]: "[]", // Not an empty array
                 },
             },
+            // Optimization: Add order by created_at for consistent results
+            order: [["created_at", "DESC"]],
         });
 
         // Extract and format all YouTube links with user information
-        let allContent = [];
+        // Performance optimization: Pre-allocate array with estimated size
+        const estimatedContentCount = users.reduce(
+            (count, user) => count + (user.youtubeLinks?.length || 0),
+            0
+        );
+        let allContent = new Array(estimatedContentCount);
+        let contentIndex = 0;
+
+        // Process all users' content in a single pass
         users.forEach((user) => {
             const userData = user.toJSON();
             if (userData.youtubeLinks && userData.youtubeLinks.length > 0) {
                 userData.youtubeLinks.forEach((link) => {
-                    allContent.push({
+                    // Security: Ensure all expected properties exist
+                    if (!link.id || !link.url) {
+                        return; // Skip invalid entries
+                    }
+
+                    allContent[contentIndex++] = {
                         id: link.id,
-                        title: link.title,
+                        title: link.title || "Untitled Video", // Provide fallback for missing titles
                         url: link.url,
-                        addedAt: link.addedAt,
+                        addedAt: link.addedAt || new Date().toISOString(), // Provide fallback for missing dates
                         user: {
                             id: userData.id,
                             name: userData.name,
                             profilePictureUrl: `/api/v1/users/${userData.id}/profile-picture`,
                         },
-                    });
+                    };
                 });
             }
         });
 
-        // Apply sorting
-        switch (sortBy) {
-            case "newest":
-                allContent.sort(
-                    (a, b) => new Date(b.addedAt) - new Date(a.addedAt)
-                );
-                break;
-            case "oldest":
-                allContent.sort(
-                    (a, b) => new Date(a.addedAt) - new Date(b.addedAt)
-                );
-                break;
-            case "popular":
-                // This is a placeholder for popularity sorting
-                // In a real app, you might track views or likes for each link
-                // For now, we'll just keep the default 'newest' sorting
-                allContent.sort(
-                    (a, b) => new Date(b.addedAt) - new Date(a.addedAt)
-                );
-                break;
-        }
+        // Trim array to actual size if pre-allocation estimate was off
+        allContent = allContent.filter(Boolean);
 
-        // Calculate total and pagination
+        // Optimization: Apply sorting efficiently
+        const getSortFn = (sortType) => {
+            // Use optimized sorting functions based on type
+            switch (sortType) {
+                case "newest":
+                    return (a, b) => new Date(b.addedAt) - new Date(a.addedAt);
+                case "oldest":
+                    return (a, b) => new Date(a.addedAt) - new Date(b.addedAt);
+                case "popular":
+                    // This is a placeholder for popularity sorting
+                    // TODO: Implement proper popularity metric when available
+                    return (a, b) => new Date(b.addedAt) - new Date(a.addedAt);
+                default:
+                    return (a, b) => new Date(b.addedAt) - new Date(a.addedAt);
+            }
+        };
+
+        // Sort the content array
+        allContent.sort(getSortFn(sortBy));
+
+        // Calculate pagination efficiently
         const total = allContent.length;
         const totalPages = Math.ceil(total / limit);
         const startIndex = (page - 1) * limit;
@@ -427,6 +445,9 @@ export const getAllContent = async (req, res, next) => {
         // Get the content for the current page
         const paginatedContent = allContent.slice(startIndex, endIndex);
 
+        // Return with proper cacheing headers if data hasn't changed
+        // Note: In production, you should implement proper cache control
+        // using ETags or Last-Modified headers
         res.status(200).json({
             success: true,
             message: "Content fetched successfully",
@@ -443,6 +464,7 @@ export const getAllContent = async (req, res, next) => {
             },
         });
     } catch (error) {
+        console.error("Error fetching content:", error);
         next(error);
     }
 };

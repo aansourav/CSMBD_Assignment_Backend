@@ -2,45 +2,89 @@ import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config/env.js";
 import { User } from "../model/user.model.js";
 
+/**
+ * Authentication middleware to protect routes
+ * This middleware validates the JWT token and attaches the user to the request object
+ *
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ * @returns {void}
+ */
 const authorize = async (req, res, next) => {
     try {
+        // Extract token from headers or cookies
         let token;
+
+        // Check Authorization header (Bearer token)
         if (
             req.headers.authorization &&
             req.headers.authorization.startsWith("Bearer")
         ) {
-            token = req.headers.authorization.split(" ")[1];
+            // Split at the space and take the token part
+            // Format: "Bearer eyJhbGciOiJIUzI1NiIsIn..."
+            token = req.headers.authorization.split(" ")[1].trim();
         }
+
+        // No token found
         if (!token) {
             return res.status(401).json({
                 success: false,
-                message: "Unauthorized",
+                message: "Authentication required. Please log in.",
             });
         }
 
-        // Verify token
-        const decoded = jwt.verify(token, JWT_SECRET);
+        try {
+            // Verify token and extract payload
+            const decoded = jwt.verify(token, JWT_SECRET);
 
-        // Use Sequelize's findByPk instead of MongoDB's findById
-        const user = await User.findByPk(decoded.userId, {
-            attributes: { exclude: ["password"] },
-        });
+            // Check for required fields in token
+            if (!decoded.userId) {
+                throw new Error("Invalid token structure");
+            }
 
-        if (!user) {
-            return res.status(401).json({
-                success: false,
-                message: "Unauthorized - User not found",
+            // Retrieve user from database (excluding password)
+            const user = await User.findByPk(decoded.userId, {
+                attributes: { exclude: ["password"] },
             });
-        }
 
-        // Set user info on request object
-        req.user = user;
-        next();
+            // User not found in database
+            if (!user) {
+                return res.status(401).json({
+                    success: false,
+                    message: "User no longer exists. Please register again.",
+                });
+            }
+
+            // Set user info on request object
+            req.user = user;
+            next();
+        } catch (jwtError) {
+            // Handle different JWT error types
+            if (jwtError.name === "TokenExpiredError") {
+                return res.status(401).json({
+                    success: false,
+                    message: "Your session has expired. Please log in again.",
+                });
+            } else if (jwtError.name === "JsonWebTokenError") {
+                return res.status(401).json({
+                    success: false,
+                    message:
+                        "Invalid authentication token. Please log in again.",
+                });
+            } else {
+                // Other JWT errors
+                return res.status(401).json({
+                    success: false,
+                    message: "Authentication failed. Please log in again.",
+                });
+            }
+        }
     } catch (error) {
-        res.status(401).json({
+        console.error("Auth middleware error:", error);
+        res.status(500).json({
             success: false,
-            message: "Unauthorized - Invalid token",
-            error: error.message,
+            message: "Server authentication error",
         });
     }
 };

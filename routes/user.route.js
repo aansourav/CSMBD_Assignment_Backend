@@ -15,22 +15,36 @@ import {
     uploadProfilePicture,
 } from "../middlewares/upload.middleware.js";
 
+/**
+ * User Routes Configuration
+ *
+ * IMPORTANT: Route order matters in Express!
+ * More specific routes should come before dynamic routes with path parameters.
+ * For example, '/content' must be defined before '/:id' to avoid treating 'content' as an ID.
+ */
 const userRouter = Router();
 
 // Public routes - Visitor Access
-// /api/v1/users - Get list of all users
+
+// Get all users with pagination
 userRouter.get("/", getUsers);
-// /api/v1/users/content - Get all content (YouTube links) across users
+
+// Get all content (YouTube links) from all users for homepage
+// NOTE: This must come BEFORE the /:id route to prevent 'content' being treated as an ID
 userRouter.get("/content", getAllContent);
-// /api/v1/users/:id - Get specific user by ID
+
+// Get specific user by ID
 userRouter.get("/:id", getUserById);
-// /api/v1/users/:id/profile-picture - Get user's profile picture
+
+// Get user's profile picture
 userRouter.get("/:id/profile-picture", getProfilePicture);
 
 // Protected routes - User Profile Management
-// /api/v1/users/profile/me - Get own profile
+
+// Get own profile
 userRouter.get("/profile/me", authorize, getProfile);
-// /api/v1/users/profile/me - Update own profile (with profile picture upload)
+
+// Update own profile (with profile picture upload)
 userRouter.put(
     "/profile/me",
     authorize,
@@ -38,9 +52,11 @@ userRouter.put(
     handleMulterError,
     updateProfile
 );
-// /api/v1/users/profile/youtube - Add YouTube link to profile
+
+// Add YouTube link to profile
 userRouter.post("/profile/youtube", authorize, addYoutubeLink);
-// /api/v1/users/profile/youtube/:linkId - Remove YouTube link from profile
+
+// Remove YouTube link from profile
 userRouter.delete("/profile/youtube/:linkId", authorize, removeYoutubeLink);
 
 export default userRouter;

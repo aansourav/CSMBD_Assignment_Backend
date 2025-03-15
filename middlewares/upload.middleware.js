@@ -1,75 +1,125 @@
+import crypto from "crypto";
 import fs from "fs";
 import multer from "multer";
 import path from "path";
 
-// Ensure upload directory exists
+/**
+ * File upload configuration and middleware
+ * Handles profile picture uploads with secure file naming,
+ * type validation, and error handling
+ */
+
+// Define upload directory paths
 const uploadDir = "./uploads";
 const profilePicturesDir = "./uploads/profile-pictures";
 
+// Ensure upload directories exist
 if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir);
+    fs.mkdirSync(uploadDir, { recursive: true });
 }
 
 if (!fs.existsSync(profilePicturesDir)) {
-    fs.mkdirSync(profilePicturesDir);
+    fs.mkdirSync(profilePicturesDir, { recursive: true });
 }
 
-// Configure storage
+// Allowed file types for user profile pictures
+const ALLOWED_FILE_TYPES = [
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+];
+// Maximum file size in bytes (2MB)
+const MAX_FILE_SIZE = 2 * 1024 * 1024;
+
+// Configure storage options for uploaded files
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, profilePicturesDir);
     },
     filename: function (req, file, cb) {
-        // Generate unique filename with timestamp and random string
-        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-        const fileExtension = path.extname(file.originalname);
-        cb(null, "profile-" + uniqueSuffix + fileExtension);
+        // Generate a secure random filename to prevent path traversal attacks
+        // and potential filename collisions
+        const randomString = crypto.randomBytes(16).toString("hex");
+        const timestamp = Date.now();
+
+        // Get safe file extension
+        const fileExtension = path.extname(file.originalname).toLowerCase();
+
+        // Create final filename: profile-{timestamp}-{randomString}.ext
+        cb(null, `profile-${timestamp}-${randomString}${fileExtension}`);
     },
 });
 
-// File filter to allow only image files
+/**
+ * File filter to validate uploaded files
+ * Ensures only allowed image types are accepted
+ */
 const fileFilter = (req, file, cb) => {
-    // Accept only image files
-    if (file.mimetype.startsWith("image/")) {
+    // Check if the file type is in our allowed list
+    if (ALLOWED_FILE_TYPES.includes(file.mimetype)) {
         cb(null, true);
     } else {
-        cb(new Error("Only image files are allowed!"), false);
+        cb(
+            new Error(
+                `Only ${ALLOWED_FILE_TYPES.join(", ")} files are allowed`
+            ),
+            false
+        );
     }
 };
 
-// Create multer upload instance
+// Create multer upload instance with our configuration
 const upload = multer({
     storage: storage,
     limits: {
-        fileSize: 1024 * 1024 * 2, // 2MB max file size
+        fileSize: MAX_FILE_SIZE,
     },
     fileFilter: fileFilter,
 });
 
-// Middleware for handling profile picture uploads
+/**
+ * Middleware for handling profile picture uploads
+ * Uses single() to capture one file with field name "profilePicture"
+ */
 export const uploadProfilePicture = upload.single("profilePicture");
 
-// Error handler middleware for multer errors
+/**
+ * Error handler middleware for multer upload errors
+ * Provides user-friendly error messages for common upload issues
+ */
 export const handleMulterError = (err, req, res, next) => {
     if (err instanceof multer.MulterError) {
-        // A Multer error occurred when uploading
-        if (err.code === "LIMIT_FILE_SIZE") {
-            return res.status(400).json({
-                success: false,
-                message: "File size too large. Maximum size is 2MB.",
-            });
+        // Handle multer-specific errors
+        switch (err.code) {
+            case "LIMIT_FILE_SIZE":
+                return res.status(400).json({
+                    success: false,
+                    message: `File size too large. Maximum size is ${
+                        MAX_FILE_SIZE / (1024 * 1024)
+                    }MB.`,
+                });
+            case "LIMIT_UNEXPECTED_FILE":
+                return res.status(400).json({
+                    success: false,
+                    message:
+                        "Unexpected file upload field. Please use 'profilePicture' field.",
+                });
+            default:
+                return res.status(400).json({
+                    success: false,
+                    message: `Upload error: ${err.message}`,
+                });
         }
-        return res.status(400).json({
-            success: false,
-            message: err.message,
-        });
     } else if (err) {
-        // An unknown error occurred
+        // Handle other errors that might occur during upload
         return res.status(400).json({
             success: false,
             message: err.message || "Error uploading file",
         });
     }
+
+    // If no errors, proceed to next middleware
     next();
 };
 
