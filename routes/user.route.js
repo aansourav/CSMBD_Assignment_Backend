@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
     addYoutubeLink,
+    getAllContent,
     getProfile,
     getProfilePicture,
     getUserById,
@@ -19,6 +20,8 @@ const userRouter = Router();
 // Public routes - Visitor Access
 // /api/v1/users - Get list of all users
 userRouter.get("/", getUsers);
+// /api/v1/users/content - Get all content (YouTube links) across users
+userRouter.get("/content", getAllContent);
 // /api/v1/users/:id - Get specific user by ID
 userRouter.get("/:id", getUserById);
 // /api/v1/users/:id/profile-picture - Get user's profile picture

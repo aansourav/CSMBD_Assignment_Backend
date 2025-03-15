@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { sequelize } from "../database/postgresql.js";
 import { User, userValidation } from "../model/user.model.js";
 
 export const getUsers = async (req, res, next) => {
@@ -333,6 +334,114 @@ export const getProfilePicture = async (req, res, next) => {
 
         // Send the profile picture file
         res.sendFile(path.join(process.cwd(), user.profilePicture));
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Get all content (YouTube links) from all users for the homepage
+export const getAllContent = async (req, res, next) => {
+    try {
+        // Validate query parameters
+        const { error } = userValidation.getAllContent.validate(req.query);
+        if (error) {
+            return res.status(400).json({
+                success: false,
+                message: error.details[0].message,
+            });
+        }
+
+        // Parse query parameters with validation
+        const page = Math.max(1, parseInt(req.query.page) || 1); // Default to page 1, minimum 1
+        const limit = Math.min(
+            50,
+            Math.max(1, parseInt(req.query.limit) || 10)
+        ); // Default 10, minimum 1, maximum 50
+        const sortBy = ["newest", "oldest", "popular"].includes(
+            req.query.sortBy
+        )
+            ? req.query.sortBy
+            : "newest"; // Default to newest
+
+        // Get all users with their YouTube links
+        const users = await User.findAll({
+            attributes: ["id", "name", "youtubeLinks"],
+            where: {
+                // Only select users who have at least one YouTube link
+                youtubeLinks: {
+                    [sequelize.Op.not]: null,
+                    [sequelize.Op.ne]: "[]", // Not an empty array
+                },
+            },
+        });
+
+        // Extract and format all YouTube links with user information
+        let allContent = [];
+        users.forEach((user) => {
+            const userData = user.toJSON();
+            if (userData.youtubeLinks && userData.youtubeLinks.length > 0) {
+                userData.youtubeLinks.forEach((link) => {
+                    allContent.push({
+                        id: link.id,
+                        title: link.title,
+                        url: link.url,
+                        addedAt: link.addedAt,
+                        user: {
+                            id: userData.id,
+                            name: userData.name,
+                            profilePictureUrl: `/api/v1/users/${userData.id}/profile-picture`,
+                        },
+                    });
+                });
+            }
+        });
+
+        // Apply sorting
+        switch (sortBy) {
+            case "newest":
+                allContent.sort(
+                    (a, b) => new Date(b.addedAt) - new Date(a.addedAt)
+                );
+                break;
+            case "oldest":
+                allContent.sort(
+                    (a, b) => new Date(a.addedAt) - new Date(b.addedAt)
+                );
+                break;
+            case "popular":
+                // This is a placeholder for popularity sorting
+                // In a real app, you might track views or likes for each link
+                // For now, we'll just keep the default 'newest' sorting
+                allContent.sort(
+                    (a, b) => new Date(b.addedAt) - new Date(a.addedAt)
+                );
+                break;
+        }
+
+        // Calculate total and pagination
+        const total = allContent.length;
+        const totalPages = Math.ceil(total / limit);
+        const startIndex = (page - 1) * limit;
+        const endIndex = Math.min(startIndex + limit, total);
+
+        // Get the content for the current page
+        const paginatedContent = allContent.slice(startIndex, endIndex);
+
+        res.status(200).json({
+            success: true,
+            message: "Content fetched successfully",
+            data: paginatedContent,
+            pagination: {
+                total,
+                limit,
+                totalPages,
+                currentPage: page,
+                hasNextPage: endIndex < total,
+                hasPreviousPage: page > 1,
+                nextPage: endIndex < total ? page + 1 : null,
+                previousPage: page > 1 ? page - 1 : null,
+            },
+        });
     } catch (error) {
         next(error);
     }
