@@ -2,7 +2,6 @@
 
 <div align="center">
 
-
 A robust backend API for a social platform enabling user registration, authentication, profile management, and content sharing.
 
 [![Node.js](https://img.shields.io/badge/Node.js-16.x-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
@@ -86,7 +85,8 @@ A robust backend API for a social platform enabling user registration, authentic
     "success": true,
     "message": "User created successfully",
     "data": {
-        "token": "eyJhbGc...",
+        "accessToken": "eyJhbGc...",
+        "refreshToken": "eyJhbGc...",
         "user": {
             "id": "123e4567-e89b-12d3-a456-426614174000",
             "name": "John Doe",
@@ -119,7 +119,8 @@ A robust backend API for a social platform enabling user registration, authentic
     "success": true,
     "message": "User signed in successfully",
     "data": {
-        "token": "eyJhbGc...",
+        "accessToken": "eyJhbGc...",
+        "refreshToken": "eyJhbGc...",
         "user": {
             "id": "123e4567-e89b-12d3-a456-426614174000",
             "name": "John Doe",
@@ -132,16 +133,65 @@ A robust backend API for a social platform enabling user registration, authentic
 </details>
 
 <details>
-<summary><b>POST /api/v1/auth/signout</b> - Logout the current user</summary>
+<summary><b>POST /api/v1/auth/refresh-token</b> - Get a new access token</summary>
+
+#### Request Body:
+
+```json
+{
+    "refreshToken": "eyJhbGc..."
+}
+```
 
 #### Success Response: `200 OK`
 
 ```json
 {
     "success": true,
-    "message": "User logged out successfully"
+    "message": "Token refreshed successfully",
+    "data": {
+        "accessToken": "eyJhbGc..."
+    }
 }
 ```
+
+#### Error Responses:
+
+-   `400 Bad Request`: Refresh token not provided
+-   `401 Unauthorized`: Invalid, expired, or revoked refresh token
+
+</details>
+
+<details>
+<summary><b>POST /api/v1/auth/signout</b> - Logout the current user</summary>
+
+#### Authentication Required
+
+This endpoint requires a valid access token in the Authorization header:
+
+```
+Authorization: Bearer <your_access_token>
+```
+
+#### Success Response: `200 OK`
+
+```json
+{
+    "success": true,
+    "message": "User signed out successfully"
+}
+```
+
+#### Error Responses:
+
+-   `401 Unauthorized`: Authentication required or invalid token
+-   `500 Internal Server Error`: Server error during sign out process
+
+#### What Happens on Logout:
+
+1. Your access token is blacklisted (cannot be used again)
+2. Your refresh token is invalidated in the database
+3. Your token version is incremented to invalidate any potentially stolen refresh tokens
 
 </details>
 
@@ -390,7 +440,9 @@ NODE_ENV=development
 
 # Authentication
 JWT_SECRET=your_secure_jwt_secret_key
-JWT_EXPIRES_IN=7d
+JWT_EXPIRES_IN=15m  # Short-lived access tokens (15 minutes)
+JWT_REFRESH_SECRET=your_secure_refresh_token_secret  # Can be different from JWT_SECRET
+JWT_REFRESH_EXPIRES_IN=7d  # Long-lived refresh tokens (7 days)
 
 # Database Configuration
 DB_URI=postgresql://username:password@localhost:5432/database_name
@@ -446,10 +498,10 @@ CORS_ORIGIN=http://localhost:3000
     ```
 
 7. **Start the production server**
-`bash
-    npm start
-    `
-  </details>
+   `bash
+npm start
+`
+   </details>
 
 <div align="right">[ <a href="#-table-of-contents">Back to Top ⬆️</a> ]</div>
 
@@ -489,19 +541,70 @@ csmbd-social-platform-api/
 
 ## 🔐 Authentication
 
-This API uses JSON Web Tokens (JWT) for authentication:
+This API uses JSON Web Tokens (JWT) for authentication with a refresh token system:
 
 <details>
 <summary><b>Authentication Flow</b></summary>
 
-1. When a user registers or logs in, a JWT token is generated and returned
-2. For protected routes, include the token in the Authorization header:
+1. When a user registers or logs in, two tokens are generated and returned:
+
+    - **Access Token**: Short-lived token (15 minutes by default) used to authenticate API requests
+    - **Refresh Token**: Longer-lived token (7 days by default) used to get new access tokens
+
+2. For protected routes, include the access token in the Authorization header:
+
     ```
-    Authorization: Bearer <your_token>
+    Authorization: Bearer <your_access_token>
     ```
-3. The `authorize` middleware validates the token before allowing access to protected resources
-4. Tokens have a configurable expiration time (default: 7 days)
+
+3. When the access token expires, use the refresh token to get a new one:
+
+    - Send a POST request to `/api/v1/auth/refresh-token` with the refresh token
+    - Store the new access token and use it for subsequent requests
+
+4. The `authorize` middleware validates the access token before allowing access to protected resources
  </details>
+
+<details>
+<summary><b>Token Security Features</b></summary>
+
+1. **Token Version Tracking**: Each user has a token version that increments on password change or forced logout
+
+    - If a refresh token is used with an outdated version, it is rejected
+    - This protects against stolen refresh tokens
+
+2. **Refresh Token Rotation**: Refresh tokens are stored in the database
+
+    - Each user can have only one valid refresh token at a time
+    - On logout, the refresh token is invalidated
+
+3. **Access Token Blacklisting**: When a user logs out, their current access token is blacklisted
+    - Blacklisted tokens are rejected by the authentication middleware
+    - Tokens are automatically removed from the blacklist when they expire
+      </details>
+
+<details>
+<summary><b>Token Invalidation (Logout)</b></summary>
+
+The current implementation uses an in-memory token blacklist:
+
+1. When a user logs out, their access token is added to the blacklist
+2. Their refresh token is invalidated in the database
+3. Their token version is incremented to invalidate any other refresh tokens
+4. Blacklisted tokens are rejected by the authentication middleware
+5. Tokens are automatically removed from the blacklist when they expire
+
+**⚠️ Development Notice:** The current token blacklisting uses in-memory storage which:
+
+-   Does not persist across server restarts
+-   Does not work in distributed environments with multiple server instances
+-   Is suitable for development but not production deployments
+
+For production deployments, consider implementing:
+
+-   Redis-based token blacklisting
+-   Database-backed blacklist storage
+</details>
 
 <div align="right">[ <a href="#-table-of-contents">Back to Top ⬆️</a> ]</div>
 

@@ -26,11 +26,24 @@ export const {
     DB_URI,
     JWT_SECRET,
     JWT_EXPIRES_IN,
+    JWT_REFRESH_SECRET,
+    JWT_REFRESH_EXPIRES_IN,
     COOKIE_EXPIRES_IN,
     SERVER_URL,
 } = process.env;
 
+// Set default values for refresh token if not defined in env
+export const REFRESH_TOKEN_SECRET = JWT_REFRESH_SECRET || JWT_SECRET;
+export const REFRESH_TOKEN_EXPIRES = JWT_REFRESH_EXPIRES_IN || "7d";
+export const ACCESS_TOKEN_EXPIRES = JWT_EXPIRES_IN || "15m";
+
 // Validate required environment variables
 if (!DB_URI) {
     throw new Error(`DB_URI is not defined in ${envFile}`);
+}
+
+if (!JWT_SECRET) {
+    console.warn(
+        `⚠️ JWT_SECRET is not defined in ${envFile}. Using a default secret is not recommended for production.`
+    );
 }

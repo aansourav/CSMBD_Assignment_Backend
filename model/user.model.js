@@ -43,6 +43,19 @@ const User = sequelize.define(
                 },
             },
         },
+        // Add refresh token field to store user's refresh tokens
+        refreshToken: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+            field: "refresh_token",
+        },
+        // Add token version for enhanced security - increment on password change or forced logout
+        tokenVersion: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 0,
+            field: "token_version",
+        },
         // Add new fields for profile management
         bio: {
             type: DataTypes.TEXT,
@@ -82,6 +95,9 @@ const User = sequelize.define(
                 if (user.changed("password")) {
                     const salt = await bcrypt.genSalt(10);
                     user.password = await bcrypt.hash(user.password, salt);
+
+                    // Increment token version on password change for security
+                    user.tokenVersion = user.tokenVersion + 1;
                 }
             },
         },

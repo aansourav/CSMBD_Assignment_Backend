@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config/env.js";
+import { isTokenBlacklisted } from "../controllers/auth.controller.js";
 import { User } from "../model/user.model.js";
 
 /**
@@ -31,6 +32,14 @@ const authorize = async (req, res, next) => {
             return res.status(401).json({
                 success: false,
                 message: "Authentication required. Please log in.",
+            });
+        }
+
+        // Check if token is blacklisted (user has logged out)
+        if (isTokenBlacklisted(token)) {
+            return res.status(401).json({
+                success: false,
+                message: "Session has been invalidated. Please log in again.",
             });
         }
 
