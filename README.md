@@ -460,30 +460,30 @@ CORS_ORIGIN=http://localhost:3000
 <details>
 <summary><b>Step-by-Step Setup Instructions</b></summary>
 
-1. **Clone the repository**
+1.  **Clone the repository**
 
     ```bash
     git clone https://github.com/yourusername/csmbd-social-platform-api.git
     cd csmbd-social-platform-api
     ```
 
-2. **Install dependencies**
+2.  **Install dependencies**
 
     ```bash
     npm install
     ```
 
-3. **Set up environment variables**
+3.  **Set up environment variables**
 
     Create the `.env.development.local` file as described above
 
-4. **Create uploads directory** (if not present)
+4.  **Create uploads directory** (if not present)
 
     ```bash
     mkdir -p uploads/profile-pictures
     ```
 
-5. **Run database migrations**
+5.  **Run database migrations**
 
     ```bash
     npm run dev
@@ -491,17 +491,19 @@ CORS_ORIGIN=http://localhost:3000
 
     The first run will automatically create database tables
 
-6. **Start the development server**
+6.  **Start the development server**
 
     ```bash
     npm run dev
     ```
 
-7. **Start the production server**
-   `bash
-npm start
-`
-   </details>
+7.  **Start the production server**
+
+        ```bash
+        npm start
+        ```
+
+    </details>
 
 <div align="right">[ <a href="#-table-of-contents">Back to Top ⬆️</a> ]</div>
 
@@ -581,7 +583,7 @@ This API uses JSON Web Tokens (JWT) for authentication with a refresh token syst
 3. **Access Token Blacklisting**: When a user logs out, their current access token is blacklisted
     - Blacklisted tokens are rejected by the authentication middleware
     - Tokens are automatically removed from the blacklist when they expire
-      </details>
+          </details>
 
 <details>
 <summary><b>Token Invalidation (Logout)</b></summary>
