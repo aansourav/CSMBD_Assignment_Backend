@@ -235,6 +235,10 @@ Authorization: Bearer <your_access_token>
 }
 ```
 
+#### Security Note:
+
+All user responses exclude sensitive information like passwords, refresh tokens, and token versions.
+
 </details>
 
 <details>
@@ -301,6 +305,10 @@ Authorization: Bearer <your_access_token>
 }
 ```
 
+#### Security Note:
+
+All user responses exclude sensitive information like passwords, refresh tokens, and token versions.
+
 </details>
 
 <details>
@@ -335,6 +343,10 @@ Returns the profile image file or default image if none exists
 }
 ```
 
+#### Security Note:
+
+All user responses exclude sensitive information like passwords, refresh tokens, and token versions.
+
 </details>
 
 <details>
@@ -365,6 +377,10 @@ Returns the profile image file or default image if none exists
   }
 }
 ```
+
+#### Security Note:
+
+All user responses exclude sensitive information like passwords, refresh tokens, and token versions.
 
 </details>
 
@@ -403,6 +419,10 @@ Returns the profile image file or default image if none exists
 }
 ```
 
+#### Security Note:
+
+All user responses exclude sensitive information like passwords, refresh tokens, and token versions.
+
 </details>
 
 <details>
@@ -422,6 +442,10 @@ Returns the profile image file or default image if none exists
   }
 }
 ```
+
+#### Security Note:
+
+All user responses exclude sensitive information like passwords, refresh tokens, and token versions.
 
 </details>
 
@@ -534,6 +558,7 @@ csmbd-social-platform-api/
 │   └── profile-pictures/
 │       └── default.png
 ├── index.js             # Application entry point
+├── app.js               # Entry wrapper for index.js
 └── package.json
 ```
 
@@ -580,10 +605,8 @@ This API uses JSON Web Tokens (JWT) for authentication with a refresh token syst
     - Each user can have only one valid refresh token at a time
     - On logout, the refresh token is invalidated
 
-3. **Access Token Blacklisting**: When a user logs out, their current access token is blacklisted
-    - Blacklisted tokens are rejected by the authentication middleware
-    - Tokens are automatically removed from the blacklist when they expire
-          </details>
+3. **Access Token Blacklisting**: When a user logs out, their current access token is blacklisted - Blacklisted tokens are rejected by the authentication middleware - Tokens are automatically removed from the blacklist when they expire
+ </details>
 
 <details>
 <summary><b>Token Invalidation (Logout)</b></summary>
@@ -700,8 +723,19 @@ Profile pictures are managed with the following features:
 -   **Input Validation**: All inputs are validated to prevent injection attacks
 -   **Helmet**: HTTP headers are secured to reduce common web vulnerabilities
 -   **CORS**: Cross-Origin Resource Sharing is configured to restrict access
--   **Rate Limiting**: Limits requests to prevent brute force attacks
+-   **Information Hiding**: Sensitive data like passwords, refresh tokens, and token versions are never exposed in API responses
+-   **Token Version Tracking**: Protection against stolen refresh tokens
 -   **File Upload Security**: Strict file type validation and size limits
+</details>
+
+<details>
+<summary><b>Data Protection Measures</b></summary>
+
+-   **No Sensitive Information in Responses**: All API responses exclude sensitive authentication data
+-   **Secure Token Management**: Refresh tokens are stored securely and never exposed after initial generation
+-   **Token Versioning**: Each user has a token version that increments on password change or forced logout
+-   **Database Security**: User passwords are hashed using bcrypt with salt rounds
+-   **Input Sanitization**: All user inputs are validated and sanitized before processing
 </details>
 
 <div align="right">[ <a href="#-table-of-contents">Back to Top ⬆️</a> ]</div>

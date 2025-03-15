@@ -18,6 +18,22 @@ export const runMigrations = async () => {
 
         const existingColumns = tableInfo.map((col) => col.column_name);
 
+        // Add refresh_token column if it doesn't exist
+        if (!existingColumns.includes("refresh_token")) {
+            await sequelize.query(
+                `ALTER TABLE users ADD COLUMN refresh_token TEXT;`
+            );
+            console.log("Added 'refresh_token' column to users table");
+        }
+
+        // Add token_version column if it doesn't exist
+        if (!existingColumns.includes("token_version")) {
+            await sequelize.query(
+                `ALTER TABLE users ADD COLUMN token_version INTEGER NOT NULL DEFAULT 0;`
+            );
+            console.log("Added 'token_version' column to users table");
+        }
+
         // Add bio column if it doesn't exist
         if (!existingColumns.includes("bio")) {
             await sequelize.query(`ALTER TABLE users ADD COLUMN bio TEXT;`);

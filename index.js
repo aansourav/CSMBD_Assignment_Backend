@@ -37,9 +37,11 @@ try {
             // Run migrations to add new columns
             await runMigrations();
 
-            // This will create tables if they don't exist
-            await sequelize.sync({ alter: false });
-            console.log("✅ Database tables synchronized");
+            // This will create tables if they don't exist and alter them if needed
+            await sequelize.sync({ alter: true });
+            console.log(
+                "✅ Database tables synchronized and altered if needed"
+            );
         } catch (error) {
             console.error("❌ Error syncing database tables:", error);
         }

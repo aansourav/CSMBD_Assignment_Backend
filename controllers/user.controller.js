@@ -10,7 +10,9 @@ export const getUsers = async (req, res, next) => {
         const offset = (page - 1) * limit;
 
         const { count: totalUsers, rows: users } = await User.findAndCountAll({
-            attributes: { exclude: ["password"] },
+            attributes: {
+                exclude: ["password", "refreshToken", "tokenVersion"],
+            },
             limit: limit,
             offset: offset,
             order: [["created_at", "DESC"]],
@@ -48,7 +50,9 @@ export const getUserById = async (req, res, next) => {
         const userId = req.params.id;
 
         const user = await User.findByPk(userId, {
-            attributes: { exclude: ["password"] },
+            attributes: {
+                exclude: ["password", "refreshToken", "tokenVersion"],
+            },
         });
 
         if (!user) {
@@ -78,7 +82,9 @@ export const getProfile = async (req, res, next) => {
         const userId = req.user.id;
 
         const user = await User.findByPk(userId, {
-            attributes: { exclude: ["password"] },
+            attributes: {
+                exclude: ["password", "refreshToken", "tokenVersion"],
+            },
         });
 
         if (!user) {
@@ -171,9 +177,11 @@ export const updateProfile = async (req, res, next) => {
         // Update user
         await user.update(updateData);
 
-        // Return updated user without password
+        // Return updated user without sensitive information
         const updatedUser = await User.findByPk(userId, {
-            attributes: { exclude: ["password"] },
+            attributes: {
+                exclude: ["password", "refreshToken", "tokenVersion"],
+            },
         });
 
         // Add profile picture URL
@@ -229,9 +237,11 @@ export const addYoutubeLink = async (req, res, next) => {
             youtubeLinks: [...currentLinks, newLink],
         });
 
-        // Return updated user without password
+        // Return updated user without sensitive information
         const updatedUser = await User.findByPk(userId, {
-            attributes: { exclude: ["password"] },
+            attributes: {
+                exclude: ["password", "refreshToken", "tokenVersion"],
+            },
         });
 
         // Add profile picture URL
@@ -284,9 +294,11 @@ export const removeYoutubeLink = async (req, res, next) => {
             youtubeLinks: updatedLinks,
         });
 
-        // Return updated user without password
+        // Return updated user without sensitive information
         const updatedUser = await User.findByPk(userId, {
-            attributes: { exclude: ["password"] },
+            attributes: {
+                exclude: ["password", "refreshToken", "tokenVersion"],
+            },
         });
 
         // Add profile picture URL
