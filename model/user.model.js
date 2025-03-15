@@ -43,6 +43,28 @@ const User = sequelize.define(
                 },
             },
         },
+        // Add new fields for profile management
+        bio: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+        },
+        location: {
+            type: DataTypes.STRING(100),
+            allowNull: true,
+        },
+        // Profile picture field to store image path
+        profilePicture: {
+            type: DataTypes.STRING(255),
+            allowNull: true,
+            field: "profile_picture",
+        },
+        // Array to store YouTube embed links as JSON
+        youtubeLinks: {
+            type: DataTypes.JSONB,
+            allowNull: true,
+            defaultValue: [],
+            field: "youtube_links",
+        },
     },
     {
         tableName: "users",
@@ -106,6 +128,24 @@ const userValidation = {
         }),
         email: Joi.string().email().messages({
             "string.email": "Please enter a valid email address",
+        }),
+        bio: Joi.string().allow("").optional(),
+        location: Joi.string().max(100).allow("").optional(),
+        // Profile picture is handled by multer middleware
+    }),
+
+    // Add validation for YouTube link
+    addYoutubeLink: Joi.object({
+        youtubeUrl: Joi.string()
+            .required()
+            .pattern(/^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.*$/)
+            .messages({
+                "string.empty": "YouTube URL is required",
+                "string.pattern.base": "Invalid YouTube URL format",
+            }),
+        title: Joi.string().max(100).required().messages({
+            "string.empty": "Title is required",
+            "string.max": "Title must be less than 100 characters",
         }),
     }),
 };
