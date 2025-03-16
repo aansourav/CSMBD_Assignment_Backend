@@ -7,33 +7,6 @@ import {
 } from "../config/env.js";
 import { User, userValidation } from "../model/user.model.js";
 
-/**
- * Token Blacklist Implementation
- *
- * IMPORTANT PRODUCTION CONSIDERATIONS:
- * 1. In-memory storage is NOT recommended for production as it:
- *    - Gets cleared when the server restarts
- *    - Doesn't work across multiple server instances
- *    - Can consume significant memory with high user volumes
- *
- * RECOMMENDED PRODUCTION IMPLEMENTATIONS:
- * 1. Redis: Fast, distributed token blacklist with built-in expiration
- *    Example: const redis = require('redis'); const client = redis.createClient();
- *    - To blacklist: client.setEx(`blacklist:${token}`, tokenTTLInSeconds, '1');
- *    - To check: client.get(`blacklist:${token}`, (err, reply) => { return !!reply; });
- *
- * 2. Database Table: For persistent token blacklisting
- *    - Create a 'blacklisted_tokens' table with token and expiry columns
- *    - Use a background job to clean expired tokens (e.g., via node-cron)
- *
- * 3. Short-lived Tokens: Reduce token lifetime (e.g., 15-30 minutes)
- *    - Implement refresh tokens for improving UX while maintaining security
- *
- * 4. Token Version Tracking: Store a 'tokenVersion' in the user model
- *    - Increment on logout/password change
- *    - Verify the version in the auth middleware
- */
-
 // In-memory blacklist for invalidated tokens (DEVELOPMENT ONLY)
 const tokenBlacklist = new Set();
 

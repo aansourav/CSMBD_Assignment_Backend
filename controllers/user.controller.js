@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { sequelize } from "../database/postgresql.js";
+import { Op } from "sequelize";
 import { User, userValidation } from "../model/user.model.js";
 
 export const getUsers = async (req, res, next) => {
@@ -383,8 +383,8 @@ export const getAllContent = async (req, res, next) => {
             where: {
                 // Only select users who have at least one YouTube link
                 youtubeLinks: {
-                    [sequelize.Op.not]: null,
-                    [sequelize.Op.ne]: "[]", // Not an empty array
+                    [Op.not]: null,
+                    [Op.ne]: "[]", // Not an empty array
                 },
             },
             // Optimization: Add order by created_at for consistent results
