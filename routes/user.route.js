@@ -10,6 +10,7 @@ import {
     updateProfile,
 } from "../controllers/user.controller.js";
 import authorize from "../middlewares/auth.middleware.js";
+import { imageResourceCorsMiddleware } from "../middlewares/cors.middleware.js";
 import {
     handleMulterError,
     uploadProfilePicture,
@@ -36,8 +37,8 @@ userRouter.get("/content", getAllContent);
 // Get specific user by ID
 userRouter.get("/:id", getUserById);
 
-// Get user's profile picture
-userRouter.get("/:id/profile-picture", getProfilePicture);
+// Get user's profile picture - apply special CORS middleware for images
+userRouter.get("/:id/profile-picture", imageResourceCorsMiddleware, getProfilePicture);
 
 // Protected routes - User Profile Management
 

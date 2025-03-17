@@ -1,5 +1,4 @@
 import cookieParser from "cookie-parser";
-import cors from "cors";
 import express from "express";
 import helmet from "helmet";
 import morgan from "morgan";
@@ -7,6 +6,7 @@ import path from "path";
 import { NODE_ENV, PORT } from "./config/env.js";
 import runMigrations from "./database/migrations.js";
 import connectDB, { sequelize } from "./database/postgresql.js";
+import corsMiddleware from "./middlewares/cors.middleware.js";
 import errorMiddleware from "./middlewares/error.middleware.js";
 import authRouter from "./routes/auth.route.js";
 import userRouter from "./routes/user.route.js";
@@ -52,18 +52,14 @@ try {
 }
 
 // Security middleware
-app.use(helmet()); // Add security headers
-app.use(
-    cors({
-        origin: [
-            "http://localhost:3000",
-            "https://csmbd-assignment-frontend.vercel.app",
-        ], // Restrict to trusted origins
-        credentials: true, // Allow cookies with CORS
-        methods: ["GET", "POST", "PUT", "DELETE"], // Allow specific methods
-        allowedHeaders: ["Content-Type", "Authorization"], // Allow specific headers
-    })
-);
+app.use(helmet({
+    // Allow cross-origin images to be loaded
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    // Other default helmet protections are maintained
+}));
+
+// Use our custom CORS middleware instead of the npm cors package
+app.use(corsMiddleware());
 
 // Request parsing middleware
 app.use(express.json({ limit: "1mb" })); // Limit request body size
@@ -81,6 +77,29 @@ app.use(
     (req, res, next) => {
         // Add cache control headers for static content
         res.setHeader("Cache-Control", "public, max-age=86400"); // 24 hours
+        
+        // Add CORS headers for static files
+        const origin = req.headers.origin;
+        const allowedOrigins = [
+            'http://localhost:3000',
+            'https://csmbd-assignment-frontend.vercel.app'
+        ];
+        
+        if (origin && allowedOrigins.includes(origin)) {
+            res.setHeader('Access-Control-Allow-Origin', origin);
+        } else {
+            res.setHeader('Access-Control-Allow-Origin', '*');
+        }
+        
+        // Additional headers needed for static resources
+        res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+        
+        // Handle preflight requests
+        if (req.method === 'OPTIONS') {
+            return res.status(204).end();
+        }
+        
         next();
     },
     express.static(path.join(process.cwd(), "uploads"))

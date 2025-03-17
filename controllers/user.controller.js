@@ -332,20 +332,87 @@ export const getProfilePicture = async (req, res, next) => {
             });
         }
 
-        // If user doesn't have a profile picture, return the default one
+        // Determine file path (default or user profile picture)
+        let filePath;
         if (!user.profilePicture) {
-            return res.sendFile(
-                path.join(
+            filePath = path.join(
+                process.cwd(),
+                "uploads",
+                "profile-pictures",
+                "default.png"
+            );
+        } else {
+            filePath = path.join(process.cwd(), user.profilePicture);
+        }
+
+        // Handle file streaming manually with proper CORS headers
+        fs.access(filePath, fs.constants.F_OK, (err) => {
+            if (err) {
+                // If file doesn't exist, return the default image
+                filePath = path.join(
                     process.cwd(),
                     "uploads",
                     "profile-pictures",
                     "default.png"
-                )
-            );
-        }
+                );
+            }
 
-        // Send the profile picture file
-        res.sendFile(path.join(process.cwd(), user.profilePicture));
+            // Get file extension to determine content type
+            const ext = path.extname(filePath).toLowerCase();
+            let contentType = 'image/png'; // Default content type
+            
+            // Set content type based on file extension
+            switch (ext) {
+                case '.jpg':
+                case '.jpeg':
+                    contentType = 'image/jpeg';
+                    break;
+                case '.gif':
+                    contentType = 'image/gif';
+                    break;
+                case '.webp':
+                    contentType = 'image/webp';
+                    break;
+                // Default is already set to image/png
+            }
+
+            // Set proper CORS headers for cross-origin image loading
+            const origin = req.headers.origin;
+            const allowedOrigins = [
+                'http://localhost:3000',
+                'https://csmbd-assignment-frontend.vercel.app'
+            ];
+            
+            if (origin && allowedOrigins.includes(origin)) {
+                res.setHeader('Access-Control-Allow-Origin', origin);
+            } else {
+                res.setHeader('Access-Control-Allow-Origin', '*');
+            }
+            
+            // Additional CORS and image resource headers
+            res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+            res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+            res.setHeader('Timing-Allow-Origin', '*');
+            
+            // Set caching headers for better performance
+            res.setHeader('Cache-Control', 'public, max-age=86400'); // 24 hours
+            res.setHeader('Content-Type', contentType);
+
+            // Stream the file to the client
+            const fileStream = fs.createReadStream(filePath);
+            fileStream.pipe(res);
+            
+            // Handle errors during streaming
+            fileStream.on('error', (error) => {
+                console.error('Error streaming profile picture:', error);
+                if (!res.headersSent) {
+                    res.status(500).json({
+                        success: false,
+                        message: 'Error retrieving profile picture'
+                    });
+                }
+            });
+        });
     } catch (error) {
         next(error);
     }
