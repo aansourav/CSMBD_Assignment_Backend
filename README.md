@@ -26,8 +26,10 @@ A robust backend API for a social platform enabling user registration, authentic
 -   [⚠️ Error Handling](#️-error-handling)
 -   [📁 File Uploads](#-file-uploads)
 -   [🛡️ Security Implementation](#️-security-implementation)
+-   [🌐 CORS Implementation](#-cors-implementation)
 -   [⚡ Performance Optimizations](#-performance-optimizations)
 -   [🤝 Contributing](#-contributing)
+-   [📄 License](#-license)
 
 ---
 
@@ -316,7 +318,11 @@ All user responses exclude sensitive information like passwords, refresh tokens,
 
 #### Success Response:
 
-Returns the profile image file or default image if none exists
+Returns the profile image file or default image if none exists.
+
+#### CORS Support:
+
+This endpoint includes special CORS headers to ensure profile pictures can be loaded in cross-origin contexts (e.g., from different domains).
 
 </details>
 
@@ -540,26 +546,28 @@ csmbd-social-platform-api/
 ├── config/              # Configuration files
 │   └── env.js           # Environment variables setup
 ├── controllers/         # Route controllers
-│   ├── auth.controller.js
-│   └── user.controller.js
+│   ├── auth.controller.js  # Authentication logic
+│   └── user.controller.js  # User and content management
 ├── database/            # Database setup and migrations
-│   ├── migrations.js
-│   └── postgresql.js
+│   ├── migrations.js    # Schema migration handling
+│   └── postgresql.js    # Database connection configuration
 ├── middlewares/         # Express middlewares
-│   ├── auth.middleware.js
-│   ├── error.middleware.js
-│   └── upload.middleware.js
+│   ├── auth.middleware.js  # JWT authentication
+│   ├── cors.middleware.js  # Custom CORS implementation
+│   ├── error.middleware.js # Global error handling
+│   └── upload.middleware.js # File upload handling
 ├── model/               # Sequelize models
-│   └── user.model.js
+│   └── user.model.js    # User data model and validation
 ├── routes/              # Express routes
-│   ├── auth.route.js
-│   └── user.route.js
+│   ├── auth.route.js    # Authentication endpoints
+│   └── user.route.js    # User and content endpoints
 ├── uploads/             # File uploads storage
-│   └── profile-pictures/
-│       └── default.png
+│   └── profile-pictures/    # User profile images
+│       └── default.png      # Default profile picture
+├── utils/               # Utility functions and helpers
 ├── index.js             # Application entry point
 ├── app.js               # Entry wrapper for index.js
-└── package.json
+└── package.json         # Project dependencies and scripts
 ```
 
 <div align="right">[ <a href="#-table-of-contents">Back to Top ⬆️</a> ]</div>
@@ -722,10 +730,11 @@ Profile pictures are managed with the following features:
 -   **JWT Authentication**: Secure, stateless authentication mechanism
 -   **Input Validation**: All inputs are validated to prevent injection attacks
 -   **Helmet**: HTTP headers are secured to reduce common web vulnerabilities
--   **CORS**: Cross-Origin Resource Sharing is configured to restrict access
+-   **CORS**: Advanced Cross-Origin Resource Sharing configuration with resource-specific handling
 -   **Information Hiding**: Sensitive data like passwords, refresh tokens, and token versions are never exposed in API responses
 -   **Token Version Tracking**: Protection against stolen refresh tokens
 -   **File Upload Security**: Strict file type validation and size limits
+-   **Cross-Origin Resource Policy**: Properly configured for media resources
 </details>
 
 <details>
@@ -736,6 +745,48 @@ Profile pictures are managed with the following features:
 -   **Token Versioning**: Each user has a token version that increments on password change or forced logout
 -   **Database Security**: User passwords are hashed using bcrypt with salt rounds
 -   **Input Sanitization**: All user inputs are validated and sanitized before processing
+</details>
+
+<div align="right">[ <a href="#-table-of-contents">Back to Top ⬆️</a> ]</div>
+
+---
+
+## 🌐 CORS Implementation
+
+<details>
+<summary><b>Custom CORS Middleware</b></summary>
+
+The API uses a custom CORS implementation that provides:
+
+- **Origin Validation**: Only approved frontends can access the API
+- **Resource-Specific Handling**: Different CORS settings for API responses vs. media resources
+- **Preflight Support**: Proper handling of OPTIONS requests for cross-origin requests
+- **Flexible Configuration**: Adaptable to different environments and needs
+
+The implementation is more flexible than the standard cors npm package, allowing for:
+- Resource-specific CORS headers
+- Dynamic origin handling
+- Specialized handling for media resources like profile pictures
+</details>
+
+<details>
+<summary><b>Media Resource Handling</b></summary>
+
+Profile pictures and other media resources use enhanced CORS settings:
+
+- **Content Type Detection**: Automatic detection and setting of correct MIME types
+- **Special Headers**: Cross-Origin-Resource-Policy and Timing-Allow-Origin headers
+- **Caching Support**: Cache-Control headers for better performance
+- **Streaming Delivery**: Efficient file streaming with proper error handling
+</details>
+
+<details>
+<summary><b>Supported Frontend Origins</b></summary>
+
+The API supports cross-origin requests from:
+
+- **Development**: http://localhost:3000
+- **Production**: https://csmbd-assignment-frontend.vercel.app
 </details>
 
 <div align="right">[ <a href="#-table-of-contents">Back to Top ⬆️</a> ]</div>
