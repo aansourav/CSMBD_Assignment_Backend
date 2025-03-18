@@ -1,3 +1,5 @@
+<p style="color: red; font-style: italic; font-size: 18px; font-weight: bold;">N.B: .env(s) are uploaded intentionally</p>
+
 # 🌐 CSMBD Social Platform API
 
 <div align="center">
@@ -757,15 +759,16 @@ Profile pictures are managed with the following features:
 
 The API uses a custom CORS implementation that provides:
 
-- **Origin Validation**: Only approved frontends can access the API
-- **Resource-Specific Handling**: Different CORS settings for API responses vs. media resources
-- **Preflight Support**: Proper handling of OPTIONS requests for cross-origin requests
-- **Flexible Configuration**: Adaptable to different environments and needs
+-   **Origin Validation**: Only approved frontends can access the API
+-   **Resource-Specific Handling**: Different CORS settings for API responses vs. media resources
+-   **Preflight Support**: Proper handling of OPTIONS requests for cross-origin requests
+-   **Flexible Configuration**: Adaptable to different environments and needs
 
 The implementation is more flexible than the standard cors npm package, allowing for:
-- Resource-specific CORS headers
-- Dynamic origin handling
-- Specialized handling for media resources like profile pictures
+
+-   Resource-specific CORS headers
+-   Dynamic origin handling
+-   Specialized handling for media resources like profile pictures
 </details>
 
 <details>
@@ -773,10 +776,10 @@ The implementation is more flexible than the standard cors npm package, allowing
 
 Profile pictures and other media resources use enhanced CORS settings:
 
-- **Content Type Detection**: Automatic detection and setting of correct MIME types
-- **Special Headers**: Cross-Origin-Resource-Policy and Timing-Allow-Origin headers
-- **Caching Support**: Cache-Control headers for better performance
-- **Streaming Delivery**: Efficient file streaming with proper error handling
+-   **Content Type Detection**: Automatic detection and setting of correct MIME types
+-   **Special Headers**: Cross-Origin-Resource-Policy and Timing-Allow-Origin headers
+-   **Caching Support**: Cache-Control headers for better performance
+-   **Streaming Delivery**: Efficient file streaming with proper error handling
 </details>
 
 <details>
@@ -784,8 +787,8 @@ Profile pictures and other media resources use enhanced CORS settings:
 
 The API supports cross-origin requests from:
 
-- **Development**: http://localhost:3000
-- **Production**: https://csmbd-assignment-frontend.vercel.app
+-   **Development**: http://localhost:3000
+-   **Production**: https://csmbd-assignment-frontend.vercel.app
 </details>
 
 <div align="right">[ <a href="#-table-of-contents">Back to Top ⬆️</a> ]</div>
