@@ -29,7 +29,6 @@ A robust backend API for a social platform enabling user registration, authentic
 -   [🌐 CORS Implementation](#-cors-implementation)
 -   [⚡ Performance Optimizations](#-performance-optimizations)
 -   [🤝 Contributing](#-contributing)
--   [📄 License](#-license)
 
 ---
 
