@@ -1,4 +1,4 @@
-<p style="color: red; font-style: italic; font-size: 18px; font-weight: bold;">N.B: .env(s) are uploaded intentionally</p>
+ #### **_N.B: .env(s) are uploaded intentionally_**
 
 # 🌐 CSMBD Social Platform API
 
